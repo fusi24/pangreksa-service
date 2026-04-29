@@ -1,0 +1,57 @@
+package com.pangreksa.service.model.entity;
+import com.pangreksa.service.shared.AuditableEntity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "hr_leave_balance")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class HrLeaveBalance extends AuditableEntity<HrLeaveBalance>{
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hr_leave_balance_seq")
+    @SequenceGenerator(name = "hr_leave_balance_seq", sequenceName = "hr_leave_balance_seq", allocationSize = 1)
+    private Long id;
+
+    @Column(name = "year", nullable = false)
+    private int year;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "leave_absence_type_id", nullable = false)
+    private HrLeaveAbsenceTypes leaveAbsenceType;
+
+    @Column(name = "allocated_days")
+    private int allocatedDays = 0;
+
+    @Column(name = "used_days")
+    private int usedDays = 0;
+
+    @Column(name = "remaining_days", insertable = false, updatable = false)
+    private int remainingDays;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private HrPerson employee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private HrCompany company;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "generation_log_id", foreignKey = @ForeignKey(name = "hr_leave_balance_generation_log_id_fkey"))
+    private HrLeaveGenerationLog generationLog;
+
+    // BE-merged fields
+    @Column(name = "leave_type")
+    private String leaveType; // 'ANNUAL' or 'CARRY'
+
+    @Column(name = "expired_date")
+    private LocalDate expiredDate;
+    // TODO BE-DRIFT: BE used sequence "hr_leave_balance_id_seq"; Web uses "hr_leave_balance_seq". Keeping Web (canonical).
+}

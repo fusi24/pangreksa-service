@@ -1,0 +1,96 @@
+package com.pangreksa.service.model.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "hr_attendance")
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class HrAttendance {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_hr_seq")
+    @SequenceGenerator(name = "global_hr_seq", sequenceName = "global_hr_seq", allocationSize = 1)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appuser_id", nullable = false)
+    private FwAppUser appUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
+    private HrPerson person; // Direct link to hr_person
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_schedule_id", nullable = false)
+    private HrWorkSchedule workSchedule; // Direct link to hr_work_schedule
+
+    @Column(name = "attendance_date", nullable = false)
+    private LocalDate attendanceDate;
+
+    @Column(name = "check_in")
+    private LocalDateTime checkIn;
+
+    @Column(name = "check_out")
+    private LocalDateTime checkOut;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @Column(name = "branch_code")
+    private String branchCode;
+
+    @Column(name = "branch_name")
+    private String branchName;
+
+    @Column(name = "branch_address")
+    private String branchAddress;
+
+    // di HrAttendance.java
+    @Column(name = "total_work_minutes")
+    private Integer totalWorkMinutes;
+
+    // BE-merged fields (mobile attendance metadata)
+    @Column(name = "via_device", length = 10)
+    private String viaDevice; // "WEB" / "MOBILE"
+
+    @Column(name = "check_in_lat")
+    private Double checkInLat;
+
+    @Column(name = "check_in_lon")
+    private Double checkInLon;
+
+    @Column(name = "check_out_lat")
+    private Double checkOutLat;
+
+    @Column(name = "check_out_lon")
+    private Double checkOutLon;
+
+    @PrePersist
+    public void onCreate() {
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = createdAt;
+        if (viaDevice == null) viaDevice = "WEB";
+    }
+}

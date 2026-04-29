@@ -1,0 +1,19 @@
+package com.pangreksa.service.model.repo;
+
+import com.pangreksa.service.model.entity.VwAppUserAuth;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface VwAppUserAuthRepository extends JpaRepository<VwAppUserAuth, Long> {
+
+    // Cari user berdasarkan username
+    List<VwAppUserAuth> findAllByIsActiveTrueAndUsernameOrderByResponsibilityAsc(String username);
+
+    // Cari user berdasarkan email
+    List<VwAppUserAuth> findAllByIsActiveTrueAndEmailOrderByResponsibilityAsc(String email);
+
+    VwAppUserAuth findByIsActiveTrueAndUsernameAndResponsibilityAndPageId(String username, String responsibility, Long pageId);
+}
