@@ -1,6 +1,7 @@
 package com.pangreksa.service.model.repo;
 
 import com.pangreksa.service.model.entity.FwAppUser;
+import com.pangreksa.service.model.entity.HrPerson;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +44,6 @@ public interface FwAppUserRepository extends JpaRepository<FwAppUser, Long> {
 
     // Cek apakah email sudah digunakan
     boolean existsByEmail(String email);
+
+    Optional<FwAppUser> findByPerson(HrPerson person);
 }

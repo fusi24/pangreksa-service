@@ -1,7 +1,11 @@
 package com.pangreksa.service.service;
 
 import com.pangreksa.service.model.entity.Campaign;
+import com.pangreksa.service.model.entity.FwAppUser;
+import com.pangreksa.service.model.entity.HrNotification;
 import com.pangreksa.service.model.repo.CampaignRepository;
+import com.pangreksa.service.model.repo.FwAppUserRepository;
+import com.pangreksa.service.model.repo.HrNotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +31,28 @@ public class CampaignService {
     @Autowired
     public CampaignService(CampaignRepository repository) {
         this.repository = repository;
+    }
+
+    @Autowired
+    private FwAppUserRepository appUserRepository;
+
+    @Autowired
+    private HrNotificationRepository notificationRepo;
+
+    private void createCampaignNotification(String title, Long campaignId) {
+        List<FwAppUser> users = appUserRepository.findAll();
+
+        for (FwAppUser user : users) {
+            HrNotification notif = new HrNotification();
+            notif.setUsername(user.getUsername());
+            notif.setTitle(title);
+            notif.setType("CAMPAIGN");
+            notif.setReferenceId(campaignId);
+            notif.setIsRead(false);
+            notif.setCreatedAt(LocalDateTime.now());
+
+            notificationRepo.save(notif);
+        }
     }
 
     public String saveImage(byte[] imageBytes) throws IOException {
@@ -49,7 +76,17 @@ public class CampaignService {
             campaign.setCreatedBy(currentUserId);
         }
         campaign.setUpdatedBy(currentUserId);
-        return repository.save(campaign);
+        Campaign saved = repository.save(campaign);
+
+    // 🔔 NOTIF KE SEMUA USER (hanya saat create)
+            if (campaign.getId() == null) {
+                createCampaignNotification(
+                        "Campaign baru tersedia: " + campaign.getTitle(),
+                        saved.getId()
+                );
+            }
+
+        return saved;
     }
 
     public List<Campaign> getAllCampaigns() {

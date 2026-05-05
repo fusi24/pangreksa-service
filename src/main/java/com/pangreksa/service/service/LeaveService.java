@@ -24,10 +24,11 @@ public class LeaveService {
     private final HrLeaveGenerationLogRepository leaveGenerationLogRepository;
     private final HrLeaveApplicationRepository leaveApplicationRepository;
     private final HrLeaveAbsenceTypesRepository leaveAbsenceTypesRepository;
+    private final HrNotificationRepository notificationRepo;
 
     public LeaveService(HrPersonPositionRepository personPositionRepository, HrLeaveBalanceRepository leaveBalanceRepository,FwAppUserRepository appUserRepository,
                         FwSystemRepository systemRepository, HrLeaveGenerationLogRepository leaveGenerationLogRepository, HrLeaveApplicationRepository leaveApplicationRepository,
-                        HrLeaveAbsenceTypesRepository leaveAbsenceTypesRepository) {
+                        HrLeaveAbsenceTypesRepository leaveAbsenceTypesRepository, HrNotificationRepository notificationRepo) {
         this.personPositionRepository = personPositionRepository;
         this.leaveBalanceRepository = leaveBalanceRepository;
         this.appUserRepository = appUserRepository;
@@ -35,7 +36,7 @@ public class LeaveService {
         this.leaveGenerationLogRepository = leaveGenerationLogRepository;
         this.leaveApplicationRepository = leaveApplicationRepository;
         this.leaveAbsenceTypesRepository = leaveAbsenceTypesRepository;
-
+        this.notificationRepo = notificationRepo;
         this.getLeaveAbsenceTypesList();
     }
 
@@ -62,6 +63,18 @@ public class LeaveService {
     private FwAppUser findAppUserByUserId(String userId) {
         return appUserRepository.findByUsername(userId)
                 .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
+    }
+
+    private void createNotification(String username, String title, String type, Long referenceId) {
+        HrNotification notif = new HrNotification();
+        notif.setUsername(username);
+        notif.setTitle(title);
+        notif.setType(type);
+        notif.setReferenceId(referenceId);
+        notif.setIsRead(false);
+        notif.setCreatedAt(LocalDateTime.now());
+
+        notificationRepo.save(notif);
     }
 
     public void generateLeaveBalanceData(HrCompany company, int year, AppUserInfo appUserInfo ) {
@@ -164,7 +177,60 @@ public class LeaveService {
                 application.getEmployee().getFirstName() + " " + application.getEmployee().getLastName(),
                 application.getLeaveAbsenceType().getLabel(), application.getStartDate(), application.getEndDate());
 
-        return leaveApplicationRepository.save(application);
+        HrLeaveApplication saved = leaveApplicationRepository.save(application);
+
+        // =========================
+// 🔔 SUBMIT → MANAGER
+// =========================
+        if (saved.getStatus() == LeaveStatusEnum.SUBMITTED && saved.getSubmittedTo() != null) {
+
+            FwAppUser manager = appUserRepository
+                    .findByPerson(saved.getSubmittedTo())
+                    .orElseThrow();
+
+            createNotification(
+                    manager.getUsername(),
+                    "Pengajuan cuti baru dari " + saved.getEmployee().getFirstName(),
+                    "LEAVE",
+                    saved.getId()
+            );
+        }
+
+// =========================
+// 🔔 APPROVE → EMPLOYEE
+// =========================
+        if (saved.getStatus() == LeaveStatusEnum.APPROVED) {
+
+            FwAppUser user = appUserRepository
+                    .findByPerson(saved.getEmployee())
+                    .orElseThrow();
+
+            createNotification(
+                    user.getUsername(),
+                    "Pengajuan cuti kamu disetujui",
+                    "LEAVE",
+                    saved.getId()
+            );
+        }
+
+// =========================
+// 🔔 REJECT → EMPLOYEE
+// =========================
+        if (saved.getStatus() == LeaveStatusEnum.REJECTED) {
+
+            FwAppUser user = appUserRepository
+                    .findByPerson(saved.getEmployee())
+                    .orElseThrow();
+
+            createNotification(
+                    user.getUsername(),
+                    "Pengajuan cuti kamu ditolak",
+                    "LEAVE",
+                    saved.getId()
+            );
+        }
+
+        return saved;
     }
 
     public List<HrLeaveApplication> getLeaveApplicationsByEmployee(AppUserInfo appUser) {
