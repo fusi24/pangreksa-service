@@ -15,13 +15,14 @@ import com.pangreksa.service.model.repo.HrOfficeLocationRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.Getter;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.pangreksa.service.model.enumerate.WorkScheduleType;
-
 
 import java.time.*;
 import java.util.ArrayList;
@@ -230,6 +231,30 @@ public class AttendanceService {
     public long countAttendance(LocalDate start, LocalDate end, String searchTerm, HrCompany company, HrOrgStructure orgStructure, HrPerson emp) {
         Specification<HrAttendance> spec = buildFilterSpec(start, end, searchTerm, company, orgStructure, emp);
         return attendanceRepo.count(spec);
+    }
+
+    public List<HrAttendance> getAttendanceList(LocalDate start,
+                                                LocalDate end,
+                                                String searchTerm,
+                                                HrCompany company,
+                                                HrOrgStructure orgStructure,
+                                                HrPerson emp) {
+        if (currentUser == null) {
+            throw new IllegalStateException("App user is not set. Please call setUser() before using this method.");
+        }
+
+        Specification<HrAttendance> spec = buildFilterSpec(start, end, searchTerm, company, orgStructure, emp);
+
+        Page<HrAttendance> page = attendanceRepo.findAll(
+                spec,
+                PageRequest.of(
+                        0,
+                        Integer.MAX_VALUE,
+                        Sort.by(Sort.Direction.DESC, "attendanceDate")
+                )
+        );
+
+        return page.getContent();
     }
 
     // ✅ Fixed: Now uses start/end and adds company/department filters
