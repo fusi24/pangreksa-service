@@ -6,7 +6,7 @@ import lombok.*;
 import org.locationtech.jts.geom.Geometry;
 
 @Entity
-@Table(name = "hr_office_location")
+@Table(name = "hr_office_location", schema = "public")
 @Builder
 @Getter
 @Setter

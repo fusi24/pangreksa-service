@@ -12,7 +12,7 @@ import java.math.BigDecimal;
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_company_branch_code", columnNames = {"company_id", "branch_code"})
         }
-)
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

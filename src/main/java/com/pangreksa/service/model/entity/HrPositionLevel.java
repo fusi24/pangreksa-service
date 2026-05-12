@@ -8,7 +8,7 @@ import lombok.*;
 import com.pangreksa.service.model.entity.HrOrgStructure; // <--- BARU
 
 @Entity
-@Table(name = "hr_position_level")
+@Table(name = "hr_position_level", schema = "public")
 @Builder
 @Getter
 @Setter

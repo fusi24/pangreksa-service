@@ -8,7 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "hr_company_calendar")
+@Table(name = "hr_company_calendar", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

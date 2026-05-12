@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"employee_id", "attendance_date", "violation_type"})
         }
-)
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

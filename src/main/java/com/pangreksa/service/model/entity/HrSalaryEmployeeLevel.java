@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "hr_salary_employee_level")
+@Table(name = "hr_salary_employee_level", schema = "public")
 @Builder
 @Getter
 @Setter

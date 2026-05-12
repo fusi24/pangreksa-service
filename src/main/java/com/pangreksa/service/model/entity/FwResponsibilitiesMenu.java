@@ -6,7 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "fw_responsibilities_menu",
-        uniqueConstraints = @UniqueConstraint(name = "fw_responsibilities_menu_unique", columnNames = "id"))
+        uniqueConstraints = @UniqueConstraint(name = "fw_responsibilities_menu_unique", columnNames = "id")
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

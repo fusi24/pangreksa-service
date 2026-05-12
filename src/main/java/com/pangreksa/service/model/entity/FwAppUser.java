@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "fw_appuser_username_key", columnNames = "username"),
                 @UniqueConstraint(name = "fw_appuser_email_key", columnNames = "email")
         }
-)
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

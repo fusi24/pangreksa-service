@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
 @Entity
-@Table(name = "vw_appuser_auth")
+@Table(name = "vw_appuser_auth", schema = "public")
 @Immutable
 @Getter
 @NoArgsConstructor

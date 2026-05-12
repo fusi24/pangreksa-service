@@ -5,7 +5,7 @@ import com.pangreksa.service.model.enumerate.OrgStructureEnum;
 import jakarta.persistence.*;
 import lombok.*;
 @Entity
-@Table(name = "hr_org_structure")
+@Table(name = "hr_org_structure", schema = "public")
 @Builder
 @Getter
 @Setter

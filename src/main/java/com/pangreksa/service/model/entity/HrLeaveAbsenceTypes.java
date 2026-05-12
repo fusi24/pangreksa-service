@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "hr_leave_absence_types")
+@Table(name = "hr_leave_absence_types", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -9,7 +9,7 @@ import lombok.*;
         name = "fw_appuser_resp",
         
         uniqueConstraints = @UniqueConstraint(name = "fw_appuser_resp_unique", columnNames = "id")
-)
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

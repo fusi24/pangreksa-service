@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "hr_work_schedule")
+@Table(name = "hr_work_schedule", schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

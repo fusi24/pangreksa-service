@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "hr_tax_brackets")
+@Table(name = "hr_tax_brackets", schema = "public")
 @Getter
 @Setter
 public class HrTaxBracket {

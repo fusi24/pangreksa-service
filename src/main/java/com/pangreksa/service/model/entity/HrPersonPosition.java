@@ -12,7 +12,7 @@ import jakarta.persistence.FetchType;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "hr_person_position")
+@Table(name = "hr_person_position", schema = "public")
 @Builder
 @Getter
 @Setter

@@ -9,7 +9,7 @@ import lombok.*;
         name = "fw_responsibilities",
         
         uniqueConstraints = @UniqueConstraint(name = "fw_responsibilities_responsibility_labela_key", columnNames = "label")
-)
+        , schema = "public")
 @Getter
 @Setter
 @NoArgsConstructor

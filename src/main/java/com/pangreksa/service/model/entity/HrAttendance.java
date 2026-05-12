@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "hr_attendance")
+@Table(name = "hr_attendance", schema = "public")
 @Builder
 @Getter
 @Setter
