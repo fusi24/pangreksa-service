@@ -15,4 +15,10 @@ public interface HrContractRepository extends JpaRepository<HrContract, Long> {
             HrPerson person,
             ContractStatusEnum status
     );
+
+    List<HrContract>
+    findBySubmittedToAndStatus(
+            HrPerson submittedTo,
+            ContractStatusEnum status
+    );
 }

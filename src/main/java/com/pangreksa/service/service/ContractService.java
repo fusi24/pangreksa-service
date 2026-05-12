@@ -99,6 +99,45 @@ public class ContractService {
         return saved;
     }
 
+    public HrContract rejectContract(
+            HrContract contract,
+            FwAppUser approver,
+            String rejectReason
+    ) {
+
+        contract.setStatus(
+                ContractStatusEnum.REJECTED
+        );
+
+        contract.setNotes(
+                rejectReason
+        );
+
+        contract.setApprovedAt(
+                LocalDateTime.now()
+        );
+
+        contract.setApprovedBy(
+                approver.getPerson()
+        );
+
+        contract.setUpdatedAt(
+                LocalDateTime.now()
+        );
+
+        HrContract saved =
+                contractRepository.save(contract);
+
+        createNotification(
+                contract.getCreatedBy()
+                        .getUsername(),
+                "Kontrak ditolak manager",
+                "CONTRACT",
+                contract.getId()
+        );
+
+        return saved;
+    }
     // =====================================================
     // ACTIVATE CONTRACT
     // =====================================================
@@ -249,5 +288,17 @@ public class ContractService {
             ContractStatusEnum status
     ) {
         return contractRepository.findByStatus(status);
+    }
+
+    public List<HrContract>
+    findWaitingApprovalByApprover(
+            HrPerson approver
+    ) {
+
+        return contractRepository
+                .findBySubmittedToAndStatus(
+                        approver,
+                        ContractStatusEnum.WAITING_APPROVAL
+                );
     }
 }
