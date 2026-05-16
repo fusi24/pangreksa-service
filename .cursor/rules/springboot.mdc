@@ -1,0 +1,10 @@
+Analyze approval flow architecture in this Spring Boot project.
+
+Focus on:
+- service interaction
+- transaction boundaries
+- repository usage
+- null safety
+- approval assignment flow
+
+Do not modify code.
