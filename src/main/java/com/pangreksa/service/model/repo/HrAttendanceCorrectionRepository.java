@@ -9,17 +9,54 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface HrAttendanceCorrectionRepository extends JpaRepository<HrAttendanceCorrection, Long> {
+public interface HrAttendanceCorrectionRepository
+        extends JpaRepository<HrAttendanceCorrection, Long> {
 
-    @EntityGraph(attributePaths = {"employee", "submittedTo", "approvedBy", "attendance"})
-    List<HrAttendanceCorrection> findByEmployeeAndSubmittedAtBetweenOrderBySubmittedAtDesc(
+    @EntityGraph(attributePaths = {
+            "employee",
+            "submittedTo",
+            "approvedBy",
+            "attendance"
+    })
+    List<HrAttendanceCorrection>
+    findByEmployeeAndSubmittedAtBetweenOrderBySubmittedAtDesc(
             HrPerson employee,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     );
 
-    @EntityGraph(attributePaths = {"employee", "submittedTo", "approvedBy", "attendance"})
-    List<HrAttendanceCorrection> findBySubmittedToAndSubmittedAtBetweenAndStatusInOrderBySubmittedAtDesc(
+    @EntityGraph(attributePaths = {
+            "employee",
+            "submittedTo",
+            "approvedBy",
+            "attendance"
+    })
+    List<HrAttendanceCorrection>
+    findByEmployee_IdAndSubmittedAtBetweenOrderBySubmittedAtDesc(
+            Long employeeId,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
+    );
+
+    @EntityGraph(attributePaths = {
+            "employee",
+            "submittedTo",
+            "approvedBy",
+            "attendance"
+    })
+    List<HrAttendanceCorrection>
+    findByEmployee_IdOrderBySubmittedAtDesc(
+            Long employeeId
+    );
+
+    @EntityGraph(attributePaths = {
+            "employee",
+            "submittedTo",
+            "approvedBy",
+            "attendance"
+    })
+    List<HrAttendanceCorrection>
+    findBySubmittedToAndSubmittedAtBetweenAndStatusInOrderBySubmittedAtDesc(
             HrPerson submittedTo,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,

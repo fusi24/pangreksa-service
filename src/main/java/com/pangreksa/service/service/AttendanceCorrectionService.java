@@ -42,28 +42,108 @@ public class AttendanceCorrectionService {
     }
 
     @Transactional
-    public HrAttendanceCorrection submitCorrection(HrAttendanceCorrection draft, FwAppUser submitter) {
+    public HrAttendanceCorrection submitCorrection(
+            HrAttendanceCorrection draft,
+            FwAppUser submitter
+    ) {
+
         validateSubmission(draft);
 
-        LocalDate targetDate = resolveTargetDate(draft);
-        Optional<HrAttendance> existing = attendanceRepository.findByAppUserIdAndAttendanceDate(submitter.getId(), targetDate);
-        HrAttendance attendance = existing.orElseGet(HrAttendance::new);
+        LocalDate targetDate =
+                resolveTargetDate(draft);
 
-        // Snapshots keep auditability of what was changed and why.
+        Optional<HrAttendance> existing =
+                attendanceRepository
+                        .findByAppUserIdAndAttendanceDate(
+                                submitter.getId(),
+                                targetDate
+                        );
+
+        HrAttendance attendance =
+                existing.orElse(null);
+
+        // =====================================================
+        // RELOAD MANAGED ENTITY
+        // =====================================================
+
+        if (
+                attendance != null
+                        &&
+                        attendance.getId() != null
+        ) {
+
+            attendance =
+                    attendanceRepository
+                            .findById(
+                                    attendance.getId()
+                            )
+                            .orElseThrow();
+        }
+
+        // =====================================================
+        // SNAPSHOT
+        // =====================================================
+
         draft.setAttendance(attendance);
-        draft.setEmployee(submitter.getPerson());
-        draft.setCompany(submitter.getCompany());
-        draft.setStatus(AttendanceCorrectionStatusEnum.SUBMITTED);
-        draft.setSubmittedAt(LocalDateTime.now());
-        draft.setOriginalAttendanceDate(attendance.getAttendanceDate());
-        draft.setOriginalCheckIn(attendance.getCheckIn());
-        draft.setOriginalCheckOut(attendance.getCheckOut());
-        draft.setCreatedBy(submitter);
-        draft.setUpdatedBy(submitter);
-        draft.setUpdatedAt(LocalDateTime.now());
 
-        HrAttendanceCorrection saved = correctionRepository.save(draft);
+        draft.setEmployee(
+                submitter.getPerson()
+        );
+
+        draft.setCompany(
+                submitter.getCompany()
+        );
+
+        draft.setStatus(
+                AttendanceCorrectionStatusEnum.SUBMITTED
+        );
+
+        draft.setSubmittedAt(
+                LocalDateTime.now()
+        );
+
+        // =====================================================
+        // ORIGINAL DATA
+        // =====================================================
+
+        if (attendance != null) {
+
+            draft.setOriginalAttendanceDate(
+                    attendance.getAttendanceDate()
+            );
+
+            draft.setOriginalCheckIn(
+                    attendance.getCheckIn()
+            );
+
+            draft.setOriginalCheckOut(
+                    attendance.getCheckOut()
+            );
+        }
+
+        // =====================================================
+        // AUDIT
+        // =====================================================
+
+        draft.setCreatedBy(submitter);
+
+        draft.setUpdatedBy(submitter);
+
+        draft.setUpdatedAt(
+                LocalDateTime.now()
+        );
+
+        // =====================================================
+        // SAVE
+        // =====================================================
+
+        HrAttendanceCorrection saved =
+                correctionRepository.save(draft);
+
         notifyApproverOnSubmit(saved);
+
+
+
         return saved;
     }
 
@@ -103,13 +183,84 @@ public class AttendanceCorrectionService {
         return saved;
     }
 
-    public List<HrAttendanceCorrection> getSubmissionHistory(HrPerson employee, int monthsBack) {
-        LocalDateTime now = LocalDateTime.now();
-        return correctionRepository.findByEmployeeAndSubmittedAtBetweenOrderBySubmittedAtDesc(
-                employee,
-                now.minusMonths(monthsBack),
-                now
+    public List<HrAttendanceCorrection> getSubmissionHistory(
+            HrPerson employee,
+            int monthsBack
+    ) {
+
+        // =====================================================
+        // VALIDATION
+        // =====================================================
+
+        if (employee == null) {
+
+            System.out.println(
+                    "DEBUG ATT CORR: employee NULL"
+            );
+
+            return List.of();
+        }
+
+        // =====================================================
+        // DEBUG
+        // =====================================================
+
+        System.out.println(
+                "DEBUG ATT CORR: employeeId = "
+                        + employee.getId()
         );
+
+        LocalDateTime now =
+                LocalDateTime.now();
+
+        System.out.println(
+                "DEBUG ATT CORR: now = "
+                        + now
+        );
+
+        System.out.println(
+                "DEBUG ATT CORR: start = "
+                        + now.minusMonths(monthsBack)
+        );
+
+        // =====================================================
+        // QUERY
+        // =====================================================
+
+        List<HrAttendanceCorrection> results =
+                correctionRepository
+                        .findByEmployee_IdOrderBySubmittedAtDesc(
+                                employee.getId()
+                        );
+
+        // =====================================================
+        // DEBUG RESULT
+        // =====================================================
+
+        System.out.println(
+                "DEBUG ATT CORR: total data = "
+                        + results.size()
+        );
+
+        for (HrAttendanceCorrection item : results) {
+
+            System.out.println(
+                    "DEBUG ATT CORR ITEM => "
+                            + "id=" + item.getId()
+                            + ", employeeId="
+                            + (
+                            item.getEmployee() != null
+                                    ? item.getEmployee().getId()
+                                    : null
+                    )
+                            + ", submittedAt="
+                            + item.getSubmittedAt()
+                            + ", status="
+                            + item.getStatus()
+            );
+        }
+
+        return results;
     }
 
     public List<HrAttendanceCorrection> getPendingApprovals(HrPerson approver, int monthsBack) {
@@ -224,4 +375,6 @@ public class AttendanceCorrectionService {
         notif.setCreatedAt(LocalDateTime.now());
         notificationRepository.save(notif);
     }
+
+
 }
